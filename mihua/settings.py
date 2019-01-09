@@ -18,6 +18,11 @@ COOKIE = {
 "JSESSIONID":"a7c77a50-3472-47bf-b590-4c2dd6fbdce6",
 }
 
+MY_ORDER_COOKIE={
+
+"JSESSIONID":"4abac9bc-4a0d-4f34-a562-3952bcd0249d",
+}
+
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'mihua (+http://www.yourdomain.com)'

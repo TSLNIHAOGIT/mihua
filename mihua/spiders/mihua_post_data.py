@@ -4,7 +4,8 @@ from scrapy.http import Request,FormRequest
 from urllib import request
 import  ssl
 import os
-
+from scrapy.utils.project import get_project_settings
+settings = get_project_settings()
 print(os.path.abspath('.'))
 
 '''
@@ -14,6 +15,7 @@ print(os.path.abspath('.'))
 '''
 
 class DoubanLoginSpider(scrapy.Spider):
+    cookie = settings['MY_ORDER_COOKIE']
     headers = {
         'Accept': 'text/javascript, text/html, application/xml, text/xml, */*',
         'Accept-Encoding': 'gzip, deflate,br',
@@ -21,32 +23,48 @@ class DoubanLoginSpider(scrapy.Spider):
         'Connection': 'keep-alive',  # 保持链接状态
         'Referer': 'http://manage.sanjuhui.com/',
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36',
+
     }  # 这是请求头，用来伪装成浏览器行为
 
 
-    name = 'mihua_post'
+    name = 'mihua_post_data'
     # allowed_domains = ['douban.com']
-    start_urls = ["http://manage.sanjuhui.com/"]
+    start_urls = ["http://manage.sanjuhui.com/modules/manage/borrow/repay/urge/collection/list.htm"]
 
 
     # UserAgent = {"User-Agent:":"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.104 Safari/537.36 Core/1.53.2050.400 QQBrowser/9.5.10169.400"}
 
+
     def start_requests(self):
-        """第一次请求一下登录页面，设置开启cookie使其得到cookie，设置回调函数"""
-        #表示开启cookie记录，首次请求时写在Request()里
-        return [Request(
+        return [scrapy.FormRequest(
             self.start_urls[0],
+            cookies=self.cookie,
             headers=self.headers,
-            callback=self.Login,
-            meta={"cookiejar":1})]
+            # meta=self.meta
+            formdata={'pageSize': '10', 'current': '1'},
+            callback=self.Login)
+        ]
+
+
+    # def start_requests(self):
+    #     """第一次请求一下登录页面，设置开启cookie使其得到cookie，设置回调函数"""
+    #     #表示开启cookie记录，首次请求时写在Request()里
+    #
+    #
+    #
+    #     return [Request(
+    #         self.start_urls[0],
+    #         headers=self.headers,
+    #         callback=self.Login,
+    #         meta={"cookiejar":1})]
 
     def Login(self, response):
         print('开始登陆',response.body)
-        with open(r'/Users/ozintel/Downloads/Tsl_python_progect/local_ml/mihua/mihua/data/start_login.html', 'wb') as f:
+        with open(r'/Users/ozintel/Downloads/Tsl_python_progect/local_ml/mihua/mihua/data/post_data.html', 'wb') as f:
             f.write(response.body)
-        # 查看一下响应Cookie，也就是第一次访问注册页面时后台写入浏览器的Cookie
-        Cookie1 = response.headers.getlist('Set-Cookie')  # 查看一下响应Cookie，也就是第一次访问注册页面时后台写入浏览器的Cookie
-        print('响应Cookie1:',Cookie1)
+        # # 查看一下响应Cookie，也就是第一次访问注册页面时后台写入浏览器的Cookie
+        # Cookie1 = response.headers.getlist('Set-Cookie')  # 查看一下响应Cookie，也就是第一次访问注册页面时后台写入浏览器的Cookie
+        # print('响应Cookie1:',Cookie1)
 
 
         # captcha = response.xpath("//img[@id='captcha_image']/@src").extract()
@@ -84,24 +102,24 @@ class DoubanLoginSpider(scrapy.Spider):
         # else:
 
              # '''此时无验证码'''
-        data = {
-                "username": "zdcs01",
-                "password": "wRMHhc9ocGjs7p",
-                # "redir": "https://www.douban.com/note/645728300/",  #设置需要转向的网址，由于我们需要爬取个人中心页，所以转向个人中心页
-
-            }
-
-        print("正在登陆中……")
-        #meta={'cookiejar':response.meta['cookiejar']}表示使用上一次response的cookie，写在FormRequest.from_response()里post授权
-        """第二次用表单post请求，携带Cookie、浏览器代理、用户登录信息，进行登录给Cookie授权"""
-        #通过分析表单得到，通过chrome的network看不出来
-        return [FormRequest.from_response(response,
-                                          url="http://manage.sanjuhui.com/system/user/login.htm",  # 真实post地址
-                                          meta={"cookiejar":response.meta["cookiejar"]},
-                                          headers = self.headers,
-                                          formdata = data,
-                                          callback=self.crawlerdata,
-                                          )]
+        # data = {
+        #         "username": "zdcs01",
+        #         "password": "wRMHhc9ocGjs7p",
+        #         # "redir": "https://www.douban.com/note/645728300/",  #设置需要转向的网址，由于我们需要爬取个人中心页，所以转向个人中心页
+        #
+        #     }
+        #
+        # print("正在登陆中……")
+        # #meta={'cookiejar':response.meta['cookiejar']}表示使用上一次response的cookie，写在FormRequest.from_response()里post授权
+        # """第二次用表单post请求，携带Cookie、浏览器代理、用户登录信息，进行登录给Cookie授权"""
+        # #通过分析表单得到，通过chrome的network看不出来
+        # return [FormRequest.from_response(response,
+        #                                   url="http://manage.sanjuhui.com/system/user/login.htm",  # 真实post地址
+        #                                   meta={"cookiejar":response.meta["cookiejar"]},
+        #                                   headers = self.headers,
+        #                                   formdata = data,
+        #                                   callback=self.crawlerdata,
+        #                                   )]
 
     def crawlerdata(self,response):
         with open(r'../data/login_end.html','wb') as f:
