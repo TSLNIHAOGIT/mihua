@@ -13,9 +13,29 @@ class DmozItem(scrapy.Item):
     data = scrapy.Field()
     pages=scrapy.Field()
     current_page=scrapy.Field()
-    # answer=scrapy.Field()
-    # _id=scrapy.Field()
-    # desc = scrapy.Field()
+    total_data_counts = scrapy.Field()
+
+
+
+
+
+
+
+class DetailItem(scrapy.Item):
+    import_name = scrapy.Field()
+    other_name = scrapy.Field()
+    import_contact = scrapy.Field()
+    other_contact = scrapy.Field()
+    import_relation = scrapy.Field()
+    other_relation = scrapy.Field()
+    detail_user_id = scrapy.Field()
+    detail_user_name = scrapy.Field()
+    total_data_counts = scrapy.Field()
+
+
+
+
+
 
 
 # class MihuaItem(scrapy.Item):

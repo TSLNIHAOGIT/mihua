@@ -13,14 +13,16 @@ BOT_NAME = 'mihua'
 
 SPIDER_MODULES = ['mihua.spiders']
 NEWSPIDER_MODULE = 'mihua.spiders'
+
+#这个似乎要在浏览器上登录后不注销的情况下，只写这个sessionid才可以;sessionid只在一次登录时有效，注销后失效
 COOKIE = {
 
-"JSESSIONID":"a7c77a50-3472-47bf-b590-4c2dd6fbdce6",
+"JSESSIONID":"747d98fd-6b78-45bc-bd65-62628c319472",
 }
 
 MY_ORDER_COOKIE={
 
-"JSESSIONID":"4abac9bc-4a0d-4f34-a562-3952bcd0249d",
+"JSESSIONID":"52d27d6f-b020-410d-9a1b-526b0328b144",
 }
 
 
@@ -31,18 +33,21 @@ MY_ORDER_COOKIE={
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-#CONCURRENT_REQUESTS = 32
+CONCURRENT_REQUESTS = 100
 
 # Configure a delay for requests for the same website (default: 0)
 # See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 2
+DOWNLOAD_DELAY = 3
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
 #COOKIES_ENABLED = False
+
+RETRY_ENABLED = True
+DOWNLOAD_TIMEOUT=15
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
@@ -75,6 +80,8 @@ DOWNLOAD_DELAY = 2
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
    'mihua.pipelines.MihuaPipeline': 300,
+   # 'mihua.pipelines.MihuaPipeline_post_data_spider':400,
+
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

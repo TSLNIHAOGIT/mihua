@@ -53,8 +53,8 @@ class SanzhaSpider(Spider):
       item['pages'] =all_pages
       item['current_page']=current_page
       yield item
-      print('current_page<=all_pages',current_page,all_pages)
-      if current_page<=all_pages:
+      print('current_page<all_pages',current_page,all_pages)
+      if current_page<all_pages:
           yield Request(url='http://manage.sanjuhui.com/modules/manage/borrow/repay/urge/collection/list.htm?pageSize=10&current={}&searchParams=%7B%22state%22%3A%2211%22%7D'.format(current_page+1), callback=self.parse)
       else:
           print('所以网页爬完，爬虫已结束')

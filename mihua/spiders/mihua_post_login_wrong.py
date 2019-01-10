@@ -24,7 +24,7 @@ class DoubanLoginSpider(scrapy.Spider):
     }  # 这是请求头，用来伪装成浏览器行为
 
 
-    name = 'mihua_post'
+    name = 'mihua_post_wrong'
     # allowed_domains = ['douban.com']
     start_urls = ["http://manage.sanjuhui.com/"]
 
@@ -85,8 +85,8 @@ class DoubanLoginSpider(scrapy.Spider):
 
              # '''此时无验证码'''
         data = {
-                "username": "zd",
-                "password": "wRM",
+                "username": "zdcs01",
+                "password": "wRMHhc9ocGjs7p",
                 # "redir": "https://www.douban.com/note/645728300/",  #设置需要转向的网址，由于我们需要爬取个人中心页，所以转向个人中心页
 
             }
