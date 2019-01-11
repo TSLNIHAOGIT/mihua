@@ -10,6 +10,8 @@ from mihua.items import DmozItem,DetailItem
 from scrapy.utils.project import get_project_settings
 import json
 from scrapy.exceptions import CloseSpider
+from urllib.parse import urlparse,urlunparse,urljoin
+from scrapy.selector import Selector
 
 
 
@@ -122,8 +124,10 @@ class DoubanLoginSpider(scrapy.Spider):
                     '''
 
             yield Request(
-                url='http://manage.sanjuhui.com/modules/manage/tongdun/report.htm?pageSize=5&current={}&userId={}'.format(current_page,str(each_borrowUserId['borrowUserId']))
-                    , callback=self.get_report)
+                url='http://manage.sanjuhui.com/modules/manage/tongdun/report.htm?pageSize=5&current={}&userId={}'.format(current_page,str(each_borrowUserId['borrowUserId'])),
+                cookies=self.cookie,
+                headers=self.headers,
+                callback=self.get_report)
 
 
 
@@ -195,14 +199,31 @@ class DoubanLoginSpider(scrapy.Spider):
 
     def get_report(self,response):
         content = json.loads(response.body)
+        print('get_report content',content)
         url=content['url']
+        url =url.replace('mxreport_data','mxreport_data/reportBasic')
+
+
+
         yield Request(
-            url=url
-            , callback=self.get_report)
+            url=url,
+            cookies = self.cookie,
+            headers = self.headers,
+            callback=self.get_report_data)
 
 
     def get_report_data(self,response):
+        with open('/Users/ozintel/Downloads/Tsl_python_progect/local_ml/mihua/mihua/data/repoert_data.html', 'wb') as file:
+            file.write(response.body)
+            file.close()
         content = json.loads(response.body)
+        print('get_report_data content',content)
+        result_data=content['result']
+        # 取第6张表格的内容,td中的第一个;取前三个电话话号码
+        num_list = Selector(text=result_data).xpath(
+            '//div[@class="table"][6]/div[@class="tabbox"]/table/tbody/tr[@class="center"]/td[1]/text()').extract()[0:3]
+        print('num_list',num_list)
+
 
 
 

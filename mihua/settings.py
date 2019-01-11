@@ -17,12 +17,12 @@ NEWSPIDER_MODULE = 'mihua.spiders'
 #这个似乎要在浏览器上登录后不注销的情况下，只写这个sessionid才可以;sessionid只在一次登录时有效，注销后失效
 COOKIE = {
 
-"JSESSIONID":"747d98fd-6b78-45bc-bd65-62628c319472",
+"JSESSIONID":"05b8cb9c-9590-4d64-ba3e-86ad498b04ed",
 }
 
 MY_ORDER_COOKIE={
 
-"JSESSIONID":"52d27d6f-b020-410d-9a1b-526b0328b144",
+"JSESSIONID":"6a132271-a307-4200-9abc-22608acad2a2",
 }
 
 
