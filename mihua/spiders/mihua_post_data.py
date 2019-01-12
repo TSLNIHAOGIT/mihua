@@ -341,8 +341,8 @@ class DoubanLoginSpider(scrapy.Spider):
     #     #     captcha_value = input()
     #     #
     #     #     data = {
-    #     #         "form_email":"1330065671@qq.com",
-    #     #         "form_password":"LW199112262315.",
+    #     #         "form_email":"13q.com",
+    #     #         "form_password":"L315.",
     #     #         "captcha-solution":captcha_value,
     #     #         "redir": "https://www.douban.com/note/645728300/",  #设置需要转向的网址，由于我们需要爬取个人中心页，所以转向个人中心页
     #     #
@@ -351,8 +351,8 @@ class DoubanLoginSpider(scrapy.Spider):
     #
     #          # '''此时无验证码'''
     #     # data = {
-    #     #         "username": "zdcs01",
-    #     #         "password": "wRMHhc9ocGjs7p",
+    #     #         "username": "z01",
+    #     #         "password": "wRjs7p",
     #     #         # "redir": "https://www.douban.com/note/645728300/",  #设置需要转向的网址，由于我们需要爬取个人中心页，所以转向个人中心页
     #     #
     #     #     }

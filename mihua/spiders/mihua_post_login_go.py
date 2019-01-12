@@ -85,8 +85,8 @@ class DoubanLoginSpider(scrapy.Spider):
 
              # '''此时无验证码'''
         data = {
-                "username": "zdcs01",
-                "password": "65082194",
+                "username": "zd",
+                "password": "65",
                 # "redir": "https://www.douban.com/note/645728300/",  #设置需要转向的网址，由于我们需要爬取个人中心页，所以转向个人中心页
 
             }
