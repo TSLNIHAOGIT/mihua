@@ -259,6 +259,9 @@ class DoubanLoginSpider(scrapy.Spider):
 
 
     def get_contacts(self,response):
+
+
+
         item=Contacts()
         content=json.loads(response.body)
         data_list=content['data']['list']

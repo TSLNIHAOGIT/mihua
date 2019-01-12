@@ -105,7 +105,7 @@ class MihuaPipeline(object):
                 self.my_order_report_items.append(all_data_dict)
 
                 print('len(self.my_order_report_items)', len(self.my_order_report_items))
-                if  item['total_data_counts'] - len(self.my_order_report_items)<5:
+                if  item['total_data_counts'] - len(self.my_order_report_items)==0:
                     print('准备保存my_order_report数据')
                     df_my_order_report = pd.DataFrame(self.my_order_report_items)
                     print('df_my_order_report',df_my_order_report.head())
@@ -114,7 +114,8 @@ class MihuaPipeline(object):
                         index=False)
             elif isinstance(item,Contacts):
                 dl=item['data_list']
-                each_line = {}
+                user_id=dl[0]['userId']
+                each_line = {'user_id':user_id}
                 for index, each in enumerate(dl):
                     # print('dl each', each['name'], each['phone'])
                     each_line['name{}'.format(index)] = each['name']
@@ -123,7 +124,7 @@ class MihuaPipeline(object):
                 print('Contacts each line',each_line)
 
                 print('len(self.my_order_contacts_items)', len(self.my_order_contacts_items))
-                if item['total_data_counts'] - len(self.my_order_contacts_items) < 5:
+                if item['total_data_counts'] - len(self.my_order_contacts_items) ==0:
                     print('准备保存my_order_contacts数据')
                     df_my_order_contacts = pd.DataFrame(self.my_order_contacts_items)
                     print('df_my_order_contacts', df_my_order_contacts.head())
@@ -143,26 +144,3 @@ class MihuaPipeline(object):
 
 
 
-
-
-
-
-
-            # return item
-
-# class MihuaPipeline_post_data_spider(object):
-#     def __init__(self):
-#
-#         self.items = []
-#     def process_item(self, item, spider):
-#         print('item',item)#item是一个字典
-#         # self.items.extend(item['data'])
-#         # print('self.items',self.items)
-#         # if item['current_page']==item['pages']:
-#         #     df = pd.DataFrame(self.items)
-#         #     # df.to_csv('/Users/ozintel/Downloads/Tsl_python_progect/local_ml/mihua/mihua/data/to_collect_order.csv',index=False)
-#         #     df.to_excel('/Users/ozintel/Downloads/Tsl_python_progect/local_ml/mihua/mihua/data/to_collect_order.xlsx',
-#         #               index=False)
-#         #
-#         # print('len(self.items)',len(self.items))
-#         # # return item# 会在控制台输出原item数据，可以选择不写

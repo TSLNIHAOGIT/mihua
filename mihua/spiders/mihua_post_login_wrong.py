@@ -44,9 +44,16 @@ class DoubanLoginSpider(scrapy.Spider):
         print('开始登陆',response.body)
         with open(r'/Users/ozintel/Downloads/Tsl_python_progect/local_ml/mihua/mihua/data/start_login.html', 'wb') as f:
             f.write(response.body)
+
+        print('response',response)
+
+
         # 查看一下响应Cookie，也就是第一次访问注册页面时后台写入浏览器的Cookie
         Cookie1 = response.headers.getlist('Set-Cookie')  # 查看一下响应Cookie，也就是第一次访问注册页面时后台写入浏览器的Cookie
+        print('response.headers',response.headers)
         print('响应Cookie1:',Cookie1)
+
+
 
 
         # captcha = response.xpath("//img[@id='captcha_image']/@src").extract()
@@ -95,13 +102,13 @@ class DoubanLoginSpider(scrapy.Spider):
         #meta={'cookiejar':response.meta['cookiejar']}表示使用上一次response的cookie，写在FormRequest.from_response()里post授权
         """第二次用表单post请求，携带Cookie、浏览器代理、用户登录信息，进行登录给Cookie授权"""
         #通过分析表单得到，通过chrome的network看不出来
-        return [FormRequest.from_response(response,
-                                          url="http://manage.sanjuhui.com/system/user/login.htm",  # 真实post地址
-                                          meta={"cookiejar":response.meta["cookiejar"]},
-                                          headers = self.headers,
-                                          formdata = data,
-                                          callback=self.crawlerdata,
-                                          )]
+        # return [FormRequest.from_response(response,
+        #                                   url="http://manage.sanjuhui.com/system/user/login.htm",  # 真实post地址
+        #                                   meta={"cookiejar":response.meta["cookiejar"]},
+        #                                   headers = self.headers,
+        #                                   formdata = data,
+        #                                   callback=self.crawlerdata,
+        #                                   )]
 
     def crawlerdata(self,response):
         with open(r'../data/login_end.html','wb') as f:

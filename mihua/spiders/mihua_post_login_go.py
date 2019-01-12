@@ -4,7 +4,7 @@ from scrapy.http import Request,FormRequest
 from urllib import request
 import  ssl
 import os
-
+from scrapy.http.cookies import CookieJar
 print(os.path.abspath('.'))
 
 '''
@@ -24,7 +24,7 @@ class DoubanLoginSpider(scrapy.Spider):
     }  # 这是请求头，用来伪装成浏览器行为
 
 
-    name = 'mihua_post'
+    name = 'mihua_go'
     # allowed_domains = ['douban.com']
     start_urls = ["http://manage.sanjuhui.com/"]
 
@@ -86,7 +86,7 @@ class DoubanLoginSpider(scrapy.Spider):
              # '''此时无验证码'''
         data = {
                 "username": "zdcs01",
-                "password": "wRMHhc9ocGjs7p",
+                "password": "65082194",
                 # "redir": "https://www.douban.com/note/645728300/",  #设置需要转向的网址，由于我们需要爬取个人中心页，所以转向个人中心页
 
             }
@@ -95,26 +95,54 @@ class DoubanLoginSpider(scrapy.Spider):
         #meta={'cookiejar':response.meta['cookiejar']}表示使用上一次response的cookie，写在FormRequest.from_response()里post授权
         """第二次用表单post请求，携带Cookie、浏览器代理、用户登录信息，进行登录给Cookie授权"""
         #通过分析表单得到，通过chrome的network看不出来
+
+        cookie_jar = CookieJar()
         return [FormRequest(
                                           url="http://manage.sanjuhui.com/system/user/login.htm",  # 真实post地址
-            meta={"cookiejar": 1},
+                                          # meta={"cookiejar": 1},
+                                          meta={'dont_merge_cookies': True, 'cookiejar': cookie_jar},  # 首次请求
                                           headers = self.headers,
                                           formdata = data,
                                           callback=self.crawlerdata,
                                           )]
 
     def crawlerdata(self,response):
-        with open(r'/Users/ozintel/Downloads/Tsl_python_progect/local_ml/mihua/mihua/data/login_end.html','wb') as f:
-            f.write(response.body)
+        # with open(r'/Users/ozintel/Downloads/Tsl_python_progect/local_ml/mihua/mihua/data/login_end.html','wb') as f:
+        #     f.write(response.body)
+
+        # 查看一下响应Cookie，也就是第一次访问注册页面时后台写入浏览器的Cookie
+
+
+        # 查询网址的Cookie
+        # 请求Cookie
+        Cookie = response.request.headers.getlist('Cookie')
+        print('请求Cookie', Cookie)
+        # 响应Cookie
+        Cookie1 = response.headers.getlist('Set-Cookie')  # 查看一下响应Cookie，也就是第一次访问注册页面时后台写入浏览器的Cookie
+        print('response.headers', response.headers)
+        print('响应Cookie1:', Cookie1)
+
+
+
 
         print("完成登录.........")
-        return [FormRequest.from_response(response,
-                                          url="http://manage.sanjuhui.com/modules/manage/borrow/repay/urge/collection/list.htm",  # 真实post地址
-                                          meta={"cookiejar": response.meta["cookiejar"]},
-                                          headers=self.headers,
-                                          formdata={'pageSize': '10', 'current': '1'},
-                                          callback=self.parse_item,
-                                          )]
+        return [scrapy.FormRequest(
+            url="http://manage.sanjuhui.com/modules/manage/borrow/repay/urge/collection/list.htm",
+            # cookies=Cookie1,
+            # meta={"cookiejar": True},
+            meta={'dont_merge_cookies': True, 'cookiejar': response.meta['cookiejar']},
+            headers=self.headers,
+            formdata={'pageSize': '10', 'current': '1'},
+            callback=self.parse_item)
+        ]
+        # return [FormRequest.from_response(response,
+        #                                   url="http://manage.sanjuhui.com/modules/manage/borrow/repay/urge/collection/list.htm",  # 真实post地址
+        #                                   # meta={"cookiejar": True},#meta={"cookiejar": response.meta["cookiejar"]},
+        #                                   cookies=Cookie1,
+        #                                   headers=self.headers,
+        #                                   formdata={'pageSize': '10', 'current': '1'},
+        #                                   callback=self.parse_item,
+        #                                   )]
         # title = response.xpath("/html/head/title/text()").extract()
         # content2 = response.xpath("//meta[@name='description']/@content").extract()
         # print(title[0])
