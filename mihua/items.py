@@ -35,7 +35,23 @@ class DetailItem(scrapy.Item):
 
 
 
+class ReportItem(scrapy.Item):
+    self_num=scrapy.Field()
+    name=scrapy.Field()
+    identity=scrapy.Field()
+    other_num=scrapy.Field()
+    other_flag=scrapy.Field()
+    total_data_counts=scrapy.Field()
 
+
+class Contacts(scrapy.Item):
+    # define the fields for your item here like:
+    name = scrapy.Field()
+    phone = scrapy.Field()
+    pages=scrapy.Field()
+    current_page=scrapy.Field()
+    total_data_counts = scrapy.Field()
+    data_list= scrapy.Field()
 
 
 # class MihuaItem(scrapy.Item):

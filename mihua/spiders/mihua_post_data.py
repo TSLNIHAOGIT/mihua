@@ -6,7 +6,7 @@ import  ssl
 import os
 from scrapy.utils.project import get_project_settings
 settings = get_project_settings()
-from mihua.items import DmozItem,DetailItem
+from mihua.items import DmozItem,DetailItem,ReportItem,Contacts
 from scrapy.utils.project import get_project_settings
 import json
 from scrapy.exceptions import CloseSpider
@@ -71,7 +71,7 @@ class DoubanLoginSpider(scrapy.Spider):
 
     def parse(self, response):
         # 写到文件中,看是否下载成功
-        print('response', response.body)
+        # print('response.body', response.body)
         # with open('/Users/ozintel/Downloads/Tsl_python_progect/local_ml/mihua/mihua/data/content.html', 'wb') as file:
         #     file.write(response.body)
         #     file.close()
@@ -93,15 +93,17 @@ class DoubanLoginSpider(scrapy.Spider):
         # item['total_data_counts']=self.total_data_counts
 
 
-        #获取detail信息
-        '''
-        http://manage.sanjuhui.com/modules/manage/cl/cluser/detail.htm
-        userId: 89884
-        
-        http://manage.sanjuhui.com/modules/manage/cl/cluser/detail.htm
-        userId: 89829
-        '''
+
         for each_borrowUserId in data:
+
+            # 获取detail信息
+            '''
+            http://manage.sanjuhui.com/modules/manage/cl/cluser/detail.htm
+            userId: 89884
+
+            http://manage.sanjuhui.com/modules/manage/cl/cluser/detail.htm
+            userId: 89829
+            '''
             print('self.detail_request_counts={},each_borrowUserId '.format(self.detail_request_counts), each_borrowUserId)
             self.detail_request_counts=self.detail_request_counts+1
             yield scrapy.FormRequest(
@@ -114,7 +116,7 @@ class DoubanLoginSpider(scrapy.Spider):
 
 
 
-            '''获取report 信息'''
+            #获取report 信息
             '''
                     1.Request URL: http://manage.sanjuhui.com/modules/manage/tongdun/report.htm?pageSize=5&current=1&userId=89884
             Request Method: GET
@@ -130,6 +132,23 @@ class DoubanLoginSpider(scrapy.Spider):
                 callback=self.get_report)
 
 
+            #获取contact信息
+            '''
+            Request URL: http://manage.sanjuhui.com/modules/manage/msg/listContacts.htm
+            Request Method: POST
+            
+            pageSize: 5
+            current: 1
+            userId: 89685
+            '''
+            yield scrapy.FormRequest(
+                'http://manage.sanjuhui.com/modules/manage/msg/listContacts.htm',
+                cookies=self.cookie,
+                headers=self.headers,
+                # meta=self.meta
+                #pageSize用很大的数请求一次就可以获取所有的通讯录
+                formdata={'pageSize': str(100000),'current':str(1),'userId': str(each_borrowUserId['borrowUserId'])},  # borrowUserId
+                callback=self.get_contacts)
 
             # yield [FormRequest.from_response(response,
             #                               url="http://manage.sanjuhui.com/modules/manage/cl/cluser/detail.htm",  # 真实post地址
@@ -138,9 +157,6 @@ class DoubanLoginSpider(scrapy.Spider):
             #                               formdata={'userId': each_borrowUserId['borrowUserId']},#borrowUserId,
             #                               callback=self.get_detail,
             #                               )]
-
-
-
 
 
         print('current_page<all_pages', current_page, self.all_pages)
@@ -158,10 +174,6 @@ class DoubanLoginSpider(scrapy.Spider):
             # raise CloseSpider#手动终止爬虫
 
 
-
-
-
-
             #这个是get的请求，把链接写错了所以出问题
             # Request(
             # url='http://manage.sanjuhui.com/modules/manage/borrow/repay/urge/collection/list.htm?pageSize=10&current={}&searchParams=%7B%22state%22%3A%2211%22%7D'.format(
@@ -169,12 +181,8 @@ class DoubanLoginSpider(scrapy.Spider):
 
 
 
-
-
-
-
     def get_detail(self,response):
-        print('response.body', response.body)
+        # print('response.body', response.body)
         # with open('/Users/ozintel/Downloads/Tsl_python_progect/local_ml/mihua/mihua/data/detail.html', 'wb') as file:
         #     file.write(response.body)
         #     file.close()
@@ -203,8 +211,6 @@ class DoubanLoginSpider(scrapy.Spider):
         url=content['url']
         url =url.replace('mxreport_data','mxreport_data/reportBasic')
 
-
-
         yield Request(
             url=url,
             cookies = self.cookie,
@@ -213,23 +219,79 @@ class DoubanLoginSpider(scrapy.Spider):
 
 
     def get_report_data(self,response):
-        with open('/Users/ozintel/Downloads/Tsl_python_progect/local_ml/mihua/mihua/data/repoert_data.html', 'wb') as file:
-            file.write(response.body)
-            file.close()
+        # with open('/Users/ozintel/Downloads/Tsl_python_progect/local_ml/mihua/mihua/data/report_data_0.html', 'wb') as file:
+        #     file.write(response.body)
+        #     file.close()
+        item = ReportItem()
         content = json.loads(response.body)
         print('get_report_data content',content)
         result_data=content['result']
         # 取第6张表格的内容,td中的第一个;取前三个电话话号码
-        num_list = Selector(text=result_data).xpath(
-            '//div[@class="table"][6]/div[@class="tabbox"]/table/tbody/tr[@class="center"]/td[1]/text()').extract()[0:3]
-        print('num_list',num_list)
+        num_flag_list = Selector(text=result_data).xpath(
+            # '//div[@class="table"][6]/div[@class="tabbox"]/table/tbody/tr[@class="center"]/td[position()<3]/text()'
+            '''//div[@class="table"][6]/div[@class="tabbox"]/table/tbody/tr[@class="center"][position()<4]/td[position()<3]/text()|
+               //div[@class="table"][6]/div[@class="tabbox"]/table/tbody/tr[@class="center"][position()<4]/td[position()<3]/span[@class="detail-company-name"]/text()'''
+
+        ).extract()[0:6]
+        print('num_flag_list',num_flag_list)
+
+        num_list=[each for index, each in enumerate(num_flag_list) if index%2==0]
+        flag_list=[each for index, each in enumerate(num_flag_list) if index%2!=0]
+
+        base_list = Selector(text=result_data).xpath(
+            '//div[@class="table"][1]/div[@class="tabbox"]/table//tbody[@id="searchResultTable"]//td[@style="border: none"]/text()').extract()
+
+        print('base_list',base_list)
+        '''
+        self_num=scrapy.Field()
+    name=scrapy.Field()
+    identity=scrapy.Field()
+    other_num=scrapy.Field()
+        '''
+
+        item['name']=base_list[0]
+        item['identity']=base_list[1]
+        item['self_num'] = base_list[5]
+        item['other_num']=num_list
+        item['other_flag']=flag_list
+        item['total_data_counts'] = self.total_data_counts
+        yield item
+
+
+    def get_contacts(self,response):
+        item=Contacts()
+        content=json.loads(response.body)
+        data_list=content['data']['list']
+        print('data_list',len(data_list))
+        item['data_list']=data_list
+        item['total_data_counts']=self.total_data_counts
+        yield item
+
+        # data=content['data']
+        # page=content['page']
+        #
+        # current_page=page['current']
+        #
+        # if  current_page==1:
+        #     pages = page['pages']
+        #     total = page['total']
+        #     if total-100<=0:
+        #         pass
+        #     else:
+        #
 
 
 
 
 
 
-                # def start_requests(self):
+
+
+
+
+
+
+        # def start_requests(self):
     #     """第一次请求一下登录页面，设置开启cookie使其得到cookie，设置回调函数"""
     #     #表示开启cookie记录，首次请求时写在Request()里
     #

@@ -6,7 +6,8 @@
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
 import pandas as pd
-from mihua.items import DmozItem,DetailItem
+from mihua.items import DmozItem,DetailItem,ReportItem,Contacts
+import xlsxwriter
 
 #不同级别的pipeline是按照优先级从高到低，同一个item一次经过各个pipeline
 #多个爬虫绑定对应的pipeline
@@ -15,6 +16,8 @@ class MihuaPipeline(object):
 
         self.items = []
         self.my_order_detail_items=[]
+        self.my_order_report_items=[]
+        self.my_order_contacts_items=[]
     def process_item(self, item, spider):
         if spider.name == 'mihua':
             print('item',item)#item是一个字典
@@ -41,12 +44,6 @@ class MihuaPipeline(object):
                     df.to_excel(
                         '/Users/ozintel/Downloads/Tsl_python_progect/local_ml/mihua/mihua/data/my_order.xlsx',
                         index=False)
-
-
-
-
-
-
 
                     # df_my_order_and_detail = pd.merge(df, df_my_order_detail, how='inner',
                     #                                   left_on=['borrowName', 'borrowUserId'],
@@ -81,6 +78,65 @@ class MihuaPipeline(object):
                     df_my_order_detail.to_excel(
                         '/Users/ozintel/Downloads/Tsl_python_progect/local_ml/mihua/mihua/data/my_order_detail.xlsx',
                         index=False)
+            elif isinstance(item,ReportItem):
+
+
+                each_person_my_order_report={
+                    'name':item['name'],
+                    'self_num':item['self_num'],
+                    'identity':item['identity'],
+
+                }
+                nums={}
+                flags={}
+
+                for index,each in enumerate(item['other_num']):
+                    nums['num{}'.format(index)]=each
+
+                for index,each in enumerate(item['other_flag']):
+                    flags['flags{}'.format(index)]=each
+
+                all_data_dict={}
+                all_data_dict.update(each_person_my_order_report)
+                all_data_dict.update(nums)
+                all_data_dict.update(flags)
+                print('report all_data_dict',all_data_dict)
+
+                self.my_order_report_items.append(all_data_dict)
+
+                print('len(self.my_order_report_items)', len(self.my_order_report_items))
+                if  item['total_data_counts'] - len(self.my_order_report_items)<5:
+                    print('准备保存my_order_report数据')
+                    df_my_order_report = pd.DataFrame(self.my_order_report_items)
+                    print('df_my_order_report',df_my_order_report.head())
+                    df_my_order_report.to_excel(
+                        '/Users/ozintel/Downloads/Tsl_python_progect/local_ml/mihua/mihua/data/my_order_report.xlsx',
+                        index=False)
+            elif isinstance(item,Contacts):
+                dl=item['data_list']
+                each_line = {}
+                for index, each in enumerate(dl):
+                    # print('dl each', each['name'], each['phone'])
+                    each_line['name{}'.format(index)] = each['name']
+                    each_line['phone{}'.format(index)] = each['phone']
+                self.my_order_contacts_items.append(each_line)
+                print('Contacts each line',each_line)
+
+                print('len(self.my_order_contacts_items)', len(self.my_order_contacts_items))
+                if item['total_data_counts'] - len(self.my_order_contacts_items) < 5:
+                    print('准备保存my_order_contacts数据')
+                    df_my_order_contacts = pd.DataFrame(self.my_order_contacts_items)
+                    print('df_my_order_contacts', df_my_order_contacts.head())
+
+                    #去除非法字符不然保存时出错
+                    # df_my_order_contacts=df_my_order_contacts.applymap(lambda x: x.encode('unicode_escape').
+                    #           decode('utf-8') if isinstance(x, str) else x)
+                    df_my_order_contacts.to_excel(
+                        '/Users/ozintel/Downloads/Tsl_python_progect/local_ml/mihua/mihua/data/my_order_contacts.xlsx',
+                        engine='xlsxwriter',
+                        index=False)
+
+
             else:
                 print('出错，不属于任何已有的item')
 

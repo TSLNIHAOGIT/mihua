@@ -17,12 +17,12 @@ NEWSPIDER_MODULE = 'mihua.spiders'
 #这个似乎要在浏览器上登录后不注销的情况下，只写这个sessionid才可以;sessionid只在一次登录时有效，注销后失效
 COOKIE = {
 
-"JSESSIONID":"05b8cb9c-9590-4d64-ba3e-86ad498b04ed",
+"JSESSIONID":"33495861-6f04-49cc-b53c-3cfdfb2ed6e9",
 }
 
 MY_ORDER_COOKIE={
 
-"JSESSIONID":"6a132271-a307-4200-9abc-22608acad2a2",
+"JSESSIONID":"e9acea06-8737-45cb-bf62-17baa17d0c0b",
 }
 
 
@@ -33,7 +33,7 @@ MY_ORDER_COOKIE={
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 100
+CONCURRENT_REQUESTS = 32
 
 # Configure a delay for requests for the same website (default: 0)
 # See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
@@ -47,7 +47,8 @@ DOWNLOAD_DELAY = 3
 #COOKIES_ENABLED = False
 
 RETRY_ENABLED = True
-DOWNLOAD_TIMEOUT=15
+RETRY_TIMES = 10 #设置重试次数
+DOWNLOAD_TIMEOUT=50
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False

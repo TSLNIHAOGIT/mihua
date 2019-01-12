@@ -57,7 +57,7 @@ class SanzhaSpider(Spider):
       if current_page<all_pages:
           yield Request(url='http://manage.sanjuhui.com/modules/manage/borrow/repay/urge/collection/list.htm?pageSize=10&current={}&searchParams=%7B%22state%22%3A%2211%22%7D'.format(current_page+1), callback=self.parse)
       else:
-          print('所以网页爬完，爬虫已结束')
+          print('所有网页爬完，爬虫已结束')
 
 
 
